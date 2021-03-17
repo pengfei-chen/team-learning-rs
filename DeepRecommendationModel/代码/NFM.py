@@ -95,8 +95,8 @@ class BiInteractionPooling(Layer):
         # 优化后的公式为： 0.5 * （和的平方-平方的和）  =>> B x k
         concated_embeds_value = inputs # B x n x k
 
-        square_of_sum = tf.square(tf.reduce_sum(concated_embeds_value, axis=1, keepdims=False)) # B x k
-        sum_of_square = tf.reduce_sum(concated_embeds_value * concated_embeds_value, axis=1, keepdims=False) # B x k
+        square_of_sum = tf.square(tf.reduce_sum(concated_embeds_value, axis=1, keepdims=False)) # B x k  和的平方
+        sum_of_square = tf.reduce_sum(concated_embeds_value * concated_embeds_value, axis=1, keepdims=False) # B x k  平方的和
         cross_term = 0.5 * (square_of_sum - sum_of_square) # B x k
 
         return cross_term
