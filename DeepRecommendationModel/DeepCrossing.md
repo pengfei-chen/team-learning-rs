@@ -24,7 +24,7 @@ DeepCrossing分别**设置了不同神经网络层解决上述问题**。模型�
 
 ### 2.1 Embedding Layer
 
-将稀疏的类别型特征转成稠密的Embedding向量，Embedding的维度会远小于原始的稀疏特征向量。 Embedding是NLP里面常用的一种技术，这里的Feature #1表示的类别特征(one-hot编码后的稀疏特征向量）， Feature #2是数值型特征，不用embedding， 直接到了Stacking Layer。 关于Embedding Layer的实现， 往往一个全连接层即可，Tensorflow中有实现好的层可以直接用。 和NLP里面的embedding技术异曲同工， 比如Word2Vec， 语言模型等。
+**将稀疏的类别型特征转成稠密的Embedding向量**，Embedding的维度会远小于原始的稀疏特征向量。 Embedding是NLP里面常用的一种技术，这里的Feature #1表示的类别特征(one-hot编码后的稀疏特征向量）， Feature #2是数值型特征，不用embedding， 直接到了Stacking Layer。 关于Embedding Layer的实现， 往往一个全连接层即可，Tensorflow中有实现好的层可以直接用。 和NLP里面的embedding技术异曲同工， 比如Word2Vec， 语言模型等。
 
 ### 2.2 Stacking Layer
 
@@ -46,7 +46,7 @@ dnn_inputs = Concatenate(axis=1)([dense_dnn_inputs, sparse_dnn_inputs]) # B x (n
 
 ### 2.3 Multiple Residual Units Layer
 
-该层的主要结构是MLP， 但DeepCrossing采用了残差网络进行的连接。通过多层残差网络对特征向量各个维度充分的交叉组合， 使得模型能够抓取更多的非线性特征和组合特征信息， 增加模型的表达能力。残差网络结构如下图所示：
+该层的主要结构是MLP， 但DeepCrossing采用了残差网络进行的连接。**通过多层残差网络对特征向量各个维度充分的交叉组合**， 使得模型能够抓取更多的非线性特征和组合特征信息， 增加模型的表达能力。残差网络结构如下图所示：
 
 <img src="http://ryluo.oss-cn-chengdu.aliyuncs.com/图片20201009193957977.png" alt="image-20210217174914659" style="zoom:67%;" />
 
@@ -73,7 +73,7 @@ class ResidualBlock(Layer):
 
 ### 2.4 Scoring Layer
 
-这个作为输出层，为了拟合优化目标存在。 对于CTR预估二分类问题， Scoring往往采用逻辑回归，模型通过叠加多个残差块加深网络的深度，最后将结果转换成一个概率值输出。
+这个作为输出层，为了拟合优化目标存在。 对于CTR预估二分类问题， Scoring往往采用逻辑回归，**模型通过叠加多个残差块加深网络的深度，最后将结果转换成一个概率值输出**。
 
 ```python
 # block_nums表示DNN残差块的数量
@@ -90,14 +90,14 @@ def get_dnn_logits(dnn_inputs, block_nums=3):
 
 ## 3. 总结
 
-这就是DeepCrossing的结构了，比较清晰和简单，没有引入特殊的模型结构，只是常规的Embedding+多层神经网络。但这个网络模型的出现，有革命意义。DeepCrossing模型中没有任何人工特征工程的参与，只需要简单的特征处理，原始特征经Embedding Layer输入神经网络层，自主交叉和学习。 相比于FM，FFM只具备二阶特征交叉能力的模型，DeepCrossing可以通过调整神经网络的深度进行特征之间的“深度交叉”，这也是Deep Crossing名称的由来。 
+这就是DeepCrossing的结构了，比较清晰和简单，没有引入特殊的模型结构，只是常规的Embedding+多层神经网络。但这个网络模型的出现，有革命意义。DeepCrossing模型中没有任何人工特征工程的参与，只需要简单的特征处理，原始特征经Embedding Layer输入神经网络层，自主交叉和学习。 相比于FM，FFM只具备二阶特征交叉能力的模型，DeepCrossing可以**通过调整神经网络的深度进行特征之间的“深度交叉”**，这也是Deep Crossing名称的由来。 
 
 如果是用于点击率预估模型的损失函数就是对数损失函数：		
 
 $$
 logloss=-\frac 1N\sum_1^N(y_ilog(p_i)+(1-y_i)log(1-p_i)
 $$
-其中$$y_i$$表示真实的标签（点击或未点击），$$p_i$$表示Scoring Layer输出的结果。但是在实际应用中，根据不同的需求可以灵活替换为其他目标函数。
+其中$y_i$表示真实的标签（点击或未点击），$p_i$表示Scoring Layer输出的结果。但是在实际应用中，根据不同的需求可以灵活替换为其他目标函数。
 
 ## 4. 代码实现
 
